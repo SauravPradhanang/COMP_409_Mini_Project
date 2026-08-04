@@ -1,0 +1,19 @@
+# LL(1) Predictive Parser Demonstration
+#
+# The application uses only the Python standard library (tkinter, csv, os).
+# No third-party packages are required to run main.py.
+#
+# On Debian/Ubuntu, Tkinter is not always bundled with python3 by default
+# and may need to be installed separately:
+#
+#     sudo apt install python3-tk
+#
+# On Windows and macOS, the standard python.org installer already includes
+# Tkinter, so no extra step is needed.
+#
+# ---------------------------------------------------------------------
+# Optional dependencies (NOT required to run the app; only needed if you
+# extend it to use these libraries, as mentioned in the project spec):
+#
+# graphviz>=0.20      # nicer optional parse-tree rendering
+# pandas>=2.0          # optional table export via DataFrame
