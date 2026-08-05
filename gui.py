@@ -15,7 +15,8 @@ and CSV/TXT export.
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
-from grammar import GRAMMAR, START_SYMBOL, END_MARKER, EPSILON, format_production, production_to_string
+from grammar import (GRAMMAR, ORIGINAL_GRAMMAR, START_SYMBOL, END_MARKER,
+                     EPSILON, format_production, production_to_string)
 from first_follow import compute_first, compute_follow, sorted_set
 from parsing_table import build_parsing_table
 from parser import PredictiveParser, tokenize
@@ -108,9 +109,21 @@ class ParserApp(tk.Tk):
         right = tk.Frame(frame, bg="white", bd=1, relief="solid")
         right.pack(side="right", fill="both", expand=True, padx=10, pady=10)
 
-        tk.Label(left, text="Productions", font=("Segoe UI", 12, "bold"),
+        # Original grammar, as given in the assignment.
+        tk.Label(left, text="Original grammar (as given)", font=("Segoe UI", 12, "bold"),
                  bg="white", fg=ACCENT).pack(anchor="w", padx=10, pady=(10, 4))
-        prod_text = tk.Text(left, height=16, font=("Consolas", 11), bd=0, bg="white")
+        orig_text = tk.Text(left, height=7, font=("Consolas", 11), bd=0, bg="white")
+        orig_text.pack(fill="x", padx=10, pady=(0, 6))
+        orig_text.insert("end", "(contains immediate left recursion + ambiguous common prefixes)\n\n")
+        for nt, productions in ORIGINAL_GRAMMAR.items():
+            alts = " | ".join(production_to_string(p) for p in productions)
+            orig_text.insert("end", f"{nt:<4} \u2192 {alts}\n")
+        orig_text.configure(state="disabled")
+
+        # Transformed, LL(1)-friendly grammar, derived programmatically.
+        tk.Label(left, text="Transformed grammar (left-recursion eliminated + left-factored)",
+                 font=("Segoe UI", 12, "bold"), bg="white", fg=ACCENT).pack(anchor="w", padx=10)
+        prod_text = tk.Text(left, height=9, font=("Consolas", 11), bd=0, bg="white")
         prod_text.pack(fill="both", expand=True, padx=10, pady=(0, 10))
         for nt, productions in GRAMMAR.items():
             alts = " | ".join(production_to_string(p) for p in productions)
@@ -130,6 +143,20 @@ class ParserApp(tk.Tk):
         tk.Label(info, text="Terminals", font=("Segoe UI", 11, "bold"), bg="white", fg=ACCENT).pack(anchor="w")
         tk.Label(info, text="   ".join(self.table_result.terminals), font=("Consolas", 12),
                  bg="white").pack(anchor="w", pady=(0, 12))
+
+        # Transformations applied to the original grammar.
+        tk.Label(info, text="Transformations applied", font=("Segoe UI", 11, "bold"),
+                 bg="white", fg=ACCENT).pack(anchor="w")
+        trans_msg = (
+            "1) Immediate left recursion on B (B -> b | B C) was eliminated:\n"
+            "     B -> b B' ,  B' -> C B' | \u03b5\n"
+            "   (otherwise B would expand forever and the parser would loop)\n\n"
+            "2) Ambiguous common prefixes were left-factored:\n"
+            "     A: a b | a b A  ->  A -> a b A' ,  A' -> A | \u03b5\n"
+            "     C: c | c C      ->  C -> c C' ,   C' -> C | \u03b5"
+        )
+        tk.Label(info, text=trans_msg, font=("Consolas", 9), bg="white", fg="#2d3748",
+                 justify="left", wraplength=460, anchor="w").pack(anchor="w", pady=(0, 12), fill="x")
 
         # LL(1) verification summary (Phase 20 optional item)
         tk.Label(info, text="LL(1) Verification", font=("Segoe UI", 11, "bold"),

@@ -60,6 +60,29 @@ python3 test_cases.py       # runs all 8 predefined test cases and reports PASS/
 
 ## The grammar
 
+The grammar given in the assignment is:
+
+```
+S  → A B C
+A  → a b A | a b
+B  → b | B C
+C  → c | c C
+```
+
+As written it is **not** directly usable by a non-recursive predictive parser:
+
+- `B → b | B C` is immediately left-recursive — a naive predictive parser would
+  keep expanding `B` forever and get stuck in an infinite loop (exactly the
+  trap hinted at in the assignment).
+- `A → a b A | a b` and `C → c | c C` each share a common prefix, which is a
+  source of FIRST/FIRST ambiguity.
+
+The assignment explicitly permits generating an equivalent grammar by removing
+ambiguities and immediate left-recursion. The app does this **programmatically**
+in `grammar.py` (see `eliminate_immediate_left_recursion` and `left_factor`),
+turning the original grammar into the equivalent LL(1)-friendly one used by the
+parser:
+
 ```
 S  → A B C
 A  → a b A'
@@ -74,7 +97,7 @@ C' → C | ε
 - **Non-terminals:** `S, A, A', B, B', C, C'`
 - **Terminals:** `a, b, c, $`
 
-The language this grammar generates is `(ab)^n b c^k`, for `n ≥ 1, k ≥ 1`.
+The language both grammars generate is `(ab)^n b c^k`, for `n ≥ 1, k ≥ 1`.
 
 ### A note on LL(1) conflicts
 

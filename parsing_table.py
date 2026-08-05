@@ -37,12 +37,14 @@ GUI so the user can see exactly what happened and why.
 from grammar import GRAMMAR, EPSILON, END_MARKER, is_non_terminal, format_production
 from first_follow import compute_first, compute_follow, first_of_sequence, sorted_set
 
-# Maps (non_terminal, terminal) -> index into GRAMMAR[non_terminal] of the
-# production that should be used when more than one production is
-# applicable for that cell. See module docstring for why this is needed.
+# Maps (non_terminal, terminal) -> the production (as a list of symbols) that
+# should be used when more than one production is applicable for that cell. The
+# entry is matched against GRAMMAR[non_terminal] *by content*, so it is robust
+# to whatever production order the grammar transform happens to produce.
+# See module docstring for why these overrides are needed.
 CONFLICT_RESOLUTION = {
-    ("B'", "c"): 1,   # prefer  B' -> epsilon   (index 1 in GRAMMAR["B'"])
-    ("C'", "c"): 0,   # prefer  C' -> C         (index 0 in GRAMMAR["C'"])
+    ("B'", "c"): [],        # prefer  B' -> epsilon
+    ("C'", "c"): ["C"],     # prefer  C' -> C
 }
 
 
@@ -94,10 +96,9 @@ def build_parsing_table(grammar=GRAMMAR, first_sets=None, follow_sets=None,
         if len(candidates) == 1:
             table[key] = candidates[0][1]
         else:
-            chosen_idx = CONFLICT_RESOLUTION.get(key)
-            if chosen_idx is None:
-                chosen_idx = candidates[0][0]   # default: first-listed production
-            chosen_prod = grammar[nt][chosen_idx]
+            chosen_prod = CONFLICT_RESOLUTION.get(key)
+            if chosen_prod is None or chosen_prod not in grammar[nt]:
+                chosen_prod = candidates[0][1]   # default: first-listed production
             table[key] = chosen_prod
 
             conflicts.append({
