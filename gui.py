@@ -30,14 +30,26 @@ GOOD = "#2f855a"
 BAD = "#c53030"
 HIGHLIGHT = "#fefcbf"
 
+# Global font scaling. ui() = proportional (Segoe UI), mono() = fixed-width
+# (Consolas). Raise FONT_SCALE to make every font in the app larger at once.
+FONT_SCALE = 2
+
+
+def ui(size, weight="normal", slant="roman"):
+    return ("Segoe UI", size + FONT_SCALE, weight, slant)
+
+
+def mono(size, weight="normal", slant="normal"):
+    return ("Consolas", size + FONT_SCALE, weight, slant)
+
 
 class ParserApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("LL(1) Predictive Parser Demonstration")
-        self.geometry("1180x760")
+        self.geometry("1280x820")
         self.configure(bg=BG)
-        self.minsize(980, 640)
+        self.minsize(1020, 680)
 
         # ---- compute grammar analysis once (fast, purely CPU-bound) ----
         self.first_sets = compute_first(GRAMMAR)
@@ -66,14 +78,14 @@ class ParserApp(tk.Tk):
             style.theme_use("clam")
         except tk.TclError:
             pass
-        style.configure("TNotebook.Tab", padding=(14, 8), font=("Segoe UI", 10, "bold"))
-        style.configure("Treeview.Heading", font=("Segoe UI", 9, "bold"))
-        style.configure("Treeview", rowheight=24, font=("Consolas", 10))
-        style.configure("Accent.TButton", font=("Segoe UI", 10, "bold"))
+        style.configure("TNotebook.Tab", padding=(14, 8), font=ui(10, "bold"))
+        style.configure("Treeview.Heading", font=ui(9, "bold"))
+        style.configure("Treeview", rowheight=28, font=mono(10))
+        style.configure("Accent.TButton", font=ui(10, "bold"))
 
     def _build_layout(self):
         title = tk.Label(self, text="LL(1) Predictive Parser \u2014 Interactive Demonstration",
-                          font=("Segoe UI", 16, "bold"), bg=BG, fg="#1a202c")
+                          font=ui(16, "bold"), bg=BG, fg="#1a202c")
         title.pack(fill="x", padx=10, pady=(10, 4))
 
         self.notebook = ttk.Notebook(self)
@@ -93,7 +105,7 @@ class ParserApp(tk.Tk):
 
         self.status_var = tk.StringVar(value="")
         status = tk.Label(self, textvariable=self.status_var, anchor="w", bg="#2d3748",
-                           fg="white", font=("Segoe UI", 9), padx=8, pady=4)
+                           fg="white", font=ui(9), padx=8, pady=4)
         status.pack(fill="x", side="bottom")
 
     def _set_status(self, text):
@@ -110,9 +122,9 @@ class ParserApp(tk.Tk):
         right.pack(side="right", fill="both", expand=True, padx=10, pady=10)
 
         # Original grammar, as given in the assignment.
-        tk.Label(left, text="Original grammar (as given)", font=("Segoe UI", 12, "bold"),
+        tk.Label(left, text="Original grammar (as given)", font=ui(12, "bold"),
                  bg="white", fg=ACCENT).pack(anchor="w", padx=10, pady=(10, 4))
-        orig_text = tk.Text(left, height=7, font=("Consolas", 11), bd=0, bg="white")
+        orig_text = tk.Text(left, height=7, font=mono(11), bd=0, bg="white")
         orig_text.pack(fill="x", padx=10, pady=(0, 6))
         orig_text.insert("end", "(contains immediate left recursion + ambiguous common prefixes)\n\n")
         for nt, productions in ORIGINAL_GRAMMAR.items():
@@ -122,8 +134,8 @@ class ParserApp(tk.Tk):
 
         # Transformed, LL(1)-friendly grammar, derived programmatically.
         tk.Label(left, text="Transformed grammar (left-recursion eliminated + left-factored)",
-                 font=("Segoe UI", 12, "bold"), bg="white", fg=ACCENT).pack(anchor="w", padx=10)
-        prod_text = tk.Text(left, height=9, font=("Consolas", 11), bd=0, bg="white")
+                 font=ui(12, "bold"), bg="white", fg=ACCENT).pack(anchor="w", padx=10)
+        prod_text = tk.Text(left, height=9, font=mono(11), bd=0, bg="white")
         prod_text.pack(fill="both", expand=True, padx=10, pady=(0, 10))
         for nt, productions in GRAMMAR.items():
             alts = " | ".join(production_to_string(p) for p in productions)
@@ -133,19 +145,19 @@ class ParserApp(tk.Tk):
         info = tk.Frame(right, bg="white")
         info.pack(fill="both", expand=True, padx=10, pady=10)
 
-        tk.Label(info, text="Start Symbol", font=("Segoe UI", 11, "bold"), bg="white", fg=ACCENT).pack(anchor="w")
-        tk.Label(info, text=START_SYMBOL, font=("Consolas", 12), bg="white").pack(anchor="w", pady=(0, 12))
+        tk.Label(info, text="Start Symbol", font=ui(11, "bold"), bg="white", fg=ACCENT).pack(anchor="w")
+        tk.Label(info, text=START_SYMBOL, font=mono(12), bg="white").pack(anchor="w", pady=(0, 12))
 
-        tk.Label(info, text="Non-terminals", font=("Segoe UI", 11, "bold"), bg="white", fg=ACCENT).pack(anchor="w")
-        tk.Label(info, text="   ".join(GRAMMAR.keys()), font=("Consolas", 12), bg="white",
+        tk.Label(info, text="Non-terminals", font=ui(11, "bold"), bg="white", fg=ACCENT).pack(anchor="w")
+        tk.Label(info, text="   ".join(GRAMMAR.keys()), font=mono(12), bg="white",
                  wraplength=380, justify="left").pack(anchor="w", pady=(0, 12))
 
-        tk.Label(info, text="Terminals", font=("Segoe UI", 11, "bold"), bg="white", fg=ACCENT).pack(anchor="w")
-        tk.Label(info, text="   ".join(self.table_result.terminals), font=("Consolas", 12),
+        tk.Label(info, text="Terminals", font=ui(11, "bold"), bg="white", fg=ACCENT).pack(anchor="w")
+        tk.Label(info, text="   ".join(self.table_result.terminals), font=mono(12),
                  bg="white").pack(anchor="w", pady=(0, 12))
 
         # Transformations applied to the original grammar.
-        tk.Label(info, text="Transformations applied", font=("Segoe UI", 11, "bold"),
+        tk.Label(info, text="Transformations applied", font=ui(11, "bold"),
                  bg="white", fg=ACCENT).pack(anchor="w")
         trans_msg = (
             "1) Immediate left recursion on B (B -> b | B C) was eliminated:\n"
@@ -155,11 +167,11 @@ class ParserApp(tk.Tk):
             "     A: a b | a b A  ->  A -> a b A' ,  A' -> A | \u03b5\n"
             "     C: c | c C      ->  C -> c C' ,   C' -> C | \u03b5"
         )
-        tk.Label(info, text=trans_msg, font=("Consolas", 9), bg="white", fg="#2d3748",
+        tk.Label(info, text=trans_msg, font=mono(9), bg="white", fg="#2d3748",
                  justify="left", wraplength=460, anchor="w").pack(anchor="w", pady=(0, 12), fill="x")
 
         # LL(1) verification summary (Phase 20 optional item)
-        tk.Label(info, text="LL(1) Verification", font=("Segoe UI", 11, "bold"),
+        tk.Label(info, text="LL(1) Verification", font=ui(11, "bold"),
                  bg="white", fg=ACCENT).pack(anchor="w")
         if self.table_result.is_ll1():
             msg = "This grammar is LL(1): every table cell has a single production."
@@ -176,7 +188,7 @@ class ParserApp(tk.Tk):
                 lines.append("")
             msg = "\n".join(lines)
             color = BAD
-        tk.Label(info, text=msg, font=("Consolas", 9), bg="white", fg=color,
+        tk.Label(info, text=msg, font=mono(9), bg="white", fg=color,
                  justify="left", wraplength=440, anchor="w").pack(anchor="w", pady=(0, 8), fill="x")
 
     def _populate_first_follow_tab(self):
@@ -189,15 +201,15 @@ class ParserApp(tk.Tk):
 
         for nt in GRAMMAR:
             tk.Label(left, text=f"FIRST({nt}) = {{ {', '.join(sorted_set(self.first_sets[nt]))} }}",
-                     font=("Consolas", 11), bg="white", anchor="w", justify="left").pack(
+                     font=mono(11), bg="white", anchor="w", justify="left").pack(
                 fill="x", padx=10, pady=4, anchor="w")
         for nt in GRAMMAR:
             tk.Label(right, text=f"FOLLOW({nt}) = {{ {', '.join(sorted_set(self.follow_sets[nt]))} }}",
-                     font=("Consolas", 11), bg="white", anchor="w", justify="left").pack(
+                     font=mono(11), bg="white", anchor="w", justify="left").pack(
                 fill="x", padx=10, pady=4, anchor="w")
 
     def _make_scrollable_labelframe(self, parent, title, side):
-        outer = tk.LabelFrame(parent, text=title, font=("Segoe UI", 11, "bold"), bg="white", fg=ACCENT)
+        outer = tk.LabelFrame(parent, text=title, font=ui(11, "bold"), bg="white", fg=ACCENT)
         outer.pack(side=side, fill="both", expand=True, padx=8)
         return outer
 
@@ -241,7 +253,7 @@ class ParserApp(tk.Tk):
 
         legend = tk.Label(frame, text="\u26a0 = LL(1) conflict cell (grammar allows more than one production here; "
                                        "see the Grammar tab for details on how it was resolved).",
-                           font=("Segoe UI", 9, "italic"), bg=BG, fg=BAD)
+                           font=ui(9, "italic"), bg=BG, fg=BAD)
         legend.pack(anchor="w", padx=10, pady=(0, 6))
 
         export_bar = tk.Frame(frame, bg=BG)
@@ -274,13 +286,13 @@ class ParserApp(tk.Tk):
         controls = tk.Frame(frame, bg=BG)
         controls.pack(fill="x", padx=10, pady=(10, 4))
 
-        tk.Label(controls, text="Input string:", bg=BG, font=("Segoe UI", 10, "bold")).pack(side="left")
+        tk.Label(controls, text="Input string:", bg=BG, font=ui(10, "bold")).pack(side="left")
         self.input_var = tk.StringVar()
-        entry = tk.Entry(controls, textvariable=self.input_var, font=("Consolas", 12), width=24)
+        entry = tk.Entry(controls, textvariable=self.input_var, font=mono(12), width=24)
         entry.pack(side="left", padx=6)
         entry.bind("<Return>", lambda e: self._on_parse())
 
-        tk.Label(controls, text="Test cases:", bg=BG, font=("Segoe UI", 10, "bold")).pack(side="left", padx=(16, 4))
+        tk.Label(controls, text="Test cases:", bg=BG, font=ui(10, "bold")).pack(side="left", padx=(16, 4))
         self.test_case_var = tk.StringVar()
         all_labels = [f"\u2713 {s}" for s in tc.ACCEPTED_CASES] + [f"\u2717 {s}" for s in tc.REJECTED_CASES]
         combo = ttk.Combobox(controls, textvariable=self.test_case_var, values=all_labels,
@@ -301,35 +313,35 @@ class ParserApp(tk.Tk):
         mid.pack(fill="x", padx=10, pady=(0, 8))
 
         stack_frame = tk.LabelFrame(mid, text="Stack (top \u2192 bottom)", bg="white",
-                                     font=("Segoe UI", 10, "bold"), fg=ACCENT)
+                                     font=ui(10, "bold"), fg=ACCENT)
         stack_frame.pack(side="left", fill="y", padx=(0, 10))
-        self.stack_listbox = tk.Listbox(stack_frame, font=("Consolas", 12), width=14, height=8,
+        self.stack_listbox = tk.Listbox(stack_frame, font=mono(12), width=14, height=8,
                                          bg="white", bd=0)
         self.stack_listbox.pack(padx=8, pady=8)
 
         io_frame = tk.LabelFrame(mid, text="Input Buffer (^ = current reading position)", bg="white",
-                                  font=("Segoe UI", 10, "bold"), fg=ACCENT)
+                                  font=ui(10, "bold"), fg=ACCENT)
         io_frame.pack(side="left", fill="both", expand=True)
-        self.input_display = tk.Label(io_frame, text="", font=("Consolas", 14), bg="white",
+        self.input_display = tk.Label(io_frame, text="", font=mono(14), bg="white",
                                        anchor="w", justify="left")
         self.input_display.pack(fill="x", padx=10, pady=(10, 0))
-        self.pointer_display = tk.Label(io_frame, text="", font=("Consolas", 14), bg="white",
+        self.pointer_display = tk.Label(io_frame, text="", font=mono(14), bg="white",
                                          fg=ACCENT, anchor="w", justify="left")
         self.pointer_display.pack(fill="x", padx=10, pady=(0, 10))
 
         self.action_var = tk.StringVar(value="")
-        tk.Label(io_frame, textvariable=self.action_var, font=("Segoe UI", 10, "italic"),
+        tk.Label(io_frame, textvariable=self.action_var, font=ui(10, "italic"),
                  bg="white", fg="#2d3748", anchor="w").pack(fill="x", padx=10, pady=(0, 10))
 
         # ---- result banner ----
         self.result_var = tk.StringVar(value="")
-        self.result_label = tk.Label(frame, textvariable=self.result_var, font=("Segoe UI", 14, "bold"),
+        self.result_label = tk.Label(frame, textvariable=self.result_var, font=ui(14, "bold"),
                                       bg=BG)
         self.result_label.pack(fill="x", padx=10, pady=(0, 6))
 
         # ---- trace table ----
         trace_frame = tk.LabelFrame(frame, text="Parsing Trace", bg="white",
-                                     font=("Segoe UI", 10, "bold"), fg=ACCENT)
+                                     font=ui(10, "bold"), fg=ACCENT)
         trace_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
         cols = ("Step", "Stack", "Input", "Action")
@@ -467,12 +479,12 @@ class ParserApp(tk.Tk):
         top = tk.Frame(frame, bg=BG)
         top.pack(fill="x", padx=10, pady=(10, 4))
         tk.Label(top, text="Parse tree is built automatically after a successful parse "
-                            "(see Parser tab).", bg=BG, font=("Segoe UI", 10, "italic")).pack(anchor="w")
+                            "(see Parser tab).", bg=BG, font=ui(10, "italic")).pack(anchor="w")
 
         body = tk.Frame(frame, bg=BG)
         body.pack(fill="both", expand=True, padx=10, pady=10)
 
-        left = tk.LabelFrame(body, text="Tree (graphical)", bg="white", font=("Segoe UI", 10, "bold"), fg=ACCENT)
+        left = tk.LabelFrame(body, text="Tree (graphical)", bg="white", font=ui(10, "bold"), fg=ACCENT)
         left.pack(side="left", fill="both", expand=True, padx=(0, 8))
         self.tree_canvas = tk.Canvas(left, bg="white", height=380)
         hbar = ttk.Scrollbar(left, orient="horizontal", command=self.tree_canvas.xview)
@@ -481,15 +493,15 @@ class ParserApp(tk.Tk):
         self.tree_canvas.pack(side="top", fill="both", expand=True, padx=8, pady=(8, 0))
         hbar.pack(side="bottom", fill="x")
 
-        right = tk.LabelFrame(body, text="Tree (text)", bg="white", font=("Segoe UI", 10, "bold"), fg=ACCENT)
+        right = tk.LabelFrame(body, text="Tree (text)", bg="white", font=ui(10, "bold"), fg=ACCENT)
         right.pack(side="right", fill="both", expand=True, padx=(8, 0))
-        self.tree_text = tk.Text(right, font=("Consolas", 11), bg="white", bd=0)
+        self.tree_text = tk.Text(right, font=mono(11), bg="white", bd=0)
         self.tree_text.pack(fill="both", expand=True, padx=8, pady=8)
 
     def _draw_tree_placeholder(self):
         self.tree_canvas.delete("all")
         self.tree_canvas.create_text(20, 20, anchor="nw", text="(no tree yet \u2014 parse a string first)",
-                                      font=("Segoe UI", 10, "italic"), fill="#718096")
+                                      font=ui(10, "italic"), fill="#718096")
         self.tree_text.configure(state="normal")
         self.tree_text.delete("1.0", "end")
         self.tree_text.configure(state="disabled")

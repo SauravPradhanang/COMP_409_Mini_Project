@@ -55,7 +55,7 @@ def compute_layout(root, x0=20, y0=30, x_gap=50, y_gap=70):
     return positions, max_x, max_y
 
 
-def draw_tree(canvas, root, positions, node_radius=18,
+def draw_tree(canvas, root, positions, node_radius=20,
               node_color="#2b6cb0", matched_color="#2f855a",
               line_color="#a0aec0", text_color="white"):
     canvas.delete("all")
@@ -72,7 +72,7 @@ def draw_tree(canvas, root, positions, node_radius=18,
         color = matched_color if getattr(node, "matched", False) else node_color
         canvas.create_oval(x - node_radius, y - node_radius, x + node_radius, y + node_radius,
                             fill=color, outline="#1a202c", width=2)
-        canvas.create_text(x, y, text=node.symbol, fill=text_color, font=("Consolas", 10, "bold"))
+        canvas.create_text(x, y, text=node.symbol, fill=text_color, font=("Consolas", 12, "bold"))
         for child in node.children:
             draw_nodes(child)
 
